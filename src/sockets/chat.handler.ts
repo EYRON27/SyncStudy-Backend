@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io'
-import { prisma } from '../../lib/prisma'
+import { prisma } from '../lib/prisma'
 
 /**
  * Chat room Socket.IO event handler.
