@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  ownedRooms    Room[]        @relation("RoomOwner")
+  memberships   RoomMember[]
+  tasks         Task[]        @relation("TaskAssignee")
+  createdTasks  Task[]        @relation("TaskCreator")
+  notes         Note[]
+  messages      Message[]
+  sessions      StudySession[]
+
+  @@map("users")
+}
+
+// ─── Room ─────────────────────────────────────────────────────────────────────
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  code        String   @unique // invite code
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId String
+  owner   User   @relation("RoomOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Relations
+  members  RoomMember[]
+  tasks    Task[]
+  notes    Note[]
+  messages Message[]
+  sessions StudySession[]
+
+  @@map("rooms")
+}
+
+// ─── RoomMember ────────────────────────────────────────────────────────────────
+model RoomMember {
+  id       String   @id @default(cuid())
+  role     String   @default("member") // "owner" | "admin" | "member"
+  joinedAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
+  @@map("room_members")
+}
+
+// ─── Task (Kanban) ─────────────────────────────────────────────────────────────
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("todo") // "todo" | "in_progress" | "done"
+  priority    String   @default("medium") // "low" | "medium" | "high"
+  position    Int      @default(0) // for ordering within a column
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  creatorId  String
+  creator    User   @relation("TaskCreator", fields: [creatorId], references: [id])
+
+  assigneeId String?
+  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+
+  @@map("tasks")
+}
+
+// ─── Note ─────────────────────────────────────────────────────────────────────
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  @@map("notes")
+}
+
+// ─── Message (Chat) ────────────────────────────────────────────────────────────
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  fileUrl   String? // optional Cloudinary attachment
+  createdAt DateTime @default(now())
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+// ─── StudySession (Scheduler) ─────────────────────────────────────────────────
+model StudySession {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  createdAt   DateTime @default(now())
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  organizerId String
+  organizer   User   @relation(fields: [organizerId], references: [id])
+
+  @@map("study_sessions")
+}
