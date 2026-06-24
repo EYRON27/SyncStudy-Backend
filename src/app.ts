@@ -8,9 +8,9 @@ import { errorHandler } from './middleware/error.middleware'
 
 // ─── Route imports ─────────────────────────────────────────────────────────
 import authRoutes from './modules/auth/auth.routes'
+import tasksRoutes from './modules/tasks/tasks.routes'
 // import usersRoutes from './modules/users/users.routes'      // TODO
 // import roomsRoutes from './modules/rooms/rooms.routes'      // TODO
-// import tasksRoutes from './modules/tasks/tasks.routes'      // TODO
 // import notesRoutes from './modules/notes/notes.routes'      // TODO
 // import messagesRoutes from './modules/messages/messages.routes' // TODO
 // import schedulerRoutes from './modules/scheduler/scheduler.routes' // TODO
