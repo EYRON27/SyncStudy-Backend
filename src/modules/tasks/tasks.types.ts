@@ -3,6 +3,7 @@ export interface CreateTaskInput {
   title: string
   priority: string // "low" | "medium" | "high"
   status?: string
+  dueDate?: string
 }
 
 export interface UpdateTaskInput {
@@ -10,4 +11,5 @@ export interface UpdateTaskInput {
   status?: string
   priority?: string
   course?: string
+  dueDate?: string
 }

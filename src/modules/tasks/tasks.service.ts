@@ -59,6 +59,7 @@ export const tasksService = {
         title: input.title,
         priority: input.priority.toUpperCase(),
         status: input.status || 'todo',
+        dueDate: input.dueDate ? new Date(input.dueDate) : undefined,
         roomId: room.id,
         creatorId: userId,
       },
@@ -82,7 +83,8 @@ export const tasksService = {
     const updateData: any = {
       title: input.title,
       status: input.status,
-      priority: input.priority ? input.priority.toUpperCase() : undefined
+      priority: input.priority ? input.priority.toUpperCase() : undefined,
+      dueDate: input.dueDate ? new Date(input.dueDate) : undefined
     }
 
     // If they changed the course, find/create the new room
