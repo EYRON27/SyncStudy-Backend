@@ -16,6 +16,18 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ): void => {
+  if (err.name === 'ZodError') {
+    const zodError = err as any
+    const validationMessage = zodError.errors.map((e: any) => e.message).join(', ')
+    
+    res.status(400).json({
+      success: false,
+      message: validationMessage,
+      ...(env.NODE_ENV === 'development' && { stack: err.stack }),
+    })
+    return
+  }
+
   const statusCode = err.statusCode ?? 500
   const message = err.isOperational ? err.message : 'Internal server error'
 
