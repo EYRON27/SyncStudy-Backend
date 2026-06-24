@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { tasksController } from './tasks.controller'
-import { requireAuth } from '../../middleware/auth.middleware'
+import { authenticate } from '../../middleware/auth.middleware'
 
 const router = Router()
 
-router.use(requireAuth)
+router.use(authenticate)
 
 router.get('/', tasksController.getTasks)
 router.post('/', tasksController.createTask)
