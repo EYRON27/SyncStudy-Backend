@@ -11,5 +11,17 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
+export const verifyOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  code: z.string().length(6, 'OTP code must be 6 digits'),
+})
+
+export const googleAuthSchema = z.object({
+  googleToken: z.string().min(1, 'Google token is required'),
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
+export type GoogleAuthInput = z.infer<typeof googleAuthSchema>
+

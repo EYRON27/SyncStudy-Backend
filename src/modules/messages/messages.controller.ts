@@ -6,7 +6,7 @@ export const messagesController = {
   async getMessages(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId
-      const { roomId } = req.params
+      const roomId = req.params.roomId as string
       const page = parseInt(req.query.page as string) || 1
       const limit = parseInt(req.query.limit as string) || 50
 

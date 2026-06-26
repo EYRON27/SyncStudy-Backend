@@ -11,13 +11,15 @@ datasource db {
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  password   String?  // nullable — Google users have no password
+  avatarUrl  String?
+  provider   String   @default("email") // "email" | "google"
+  isVerified Boolean  @default(false)   // true after OTP verification or Google login
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   ownedRooms    Room[]        @relation("RoomOwner")
@@ -27,6 +29,7 @@ model User {
   notes         Note[]
   messages      Message[]
   sessions      StudySession[]
+  otpCodes      OtpCode[]
 
   @@map("users")
 }
@@ -143,4 +146,18 @@ model StudySession {
   organizer   User   @relation(fields: [organizerId], references: [id])
 
   @@map("study_sessions")
+}
+// ─── OtpCode ──────────────────────────────────────────────────────────────────
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otp_codes")
 }
