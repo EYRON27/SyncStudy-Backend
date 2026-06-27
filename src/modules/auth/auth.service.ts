@@ -23,37 +23,30 @@ export const authService = {
     if (existing) throw createError('Email already in use', 409)
 
     const hashed = await hashPassword(input.password)
-    const user = await prisma.user.create({
-      data: {
-        name: input.name,
-        email: input.email,
-        password: hashed,
-        provider: 'email',
-        isVerified: false,
-      },
-      select: { id: true, name: true, email: true, avatarUrl: true, createdAt: true },
-    })
 
     // Generate a 6-digit OTP, valid for 10 minutes
     const code = generateOtp()
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 min
     await prisma.otpCode.create({
-      data: { email: user.email, code, expiresAt, userId: user.id }
+      data: { 
+        email: input.email, 
+        code, 
+        expiresAt,
+        pendingName: input.name,
+        pendingPassword: hashed
+      }
     })
 
     // Send email (non-blocking)
-    await sendOtpEmail(user.email, code, user.name)
+    await sendOtpEmail(input.email, code, input.name)
 
-    return { email: user.email, message: 'OTP sent to your email. Please verify.' }
+    return { email: input.email, message: 'OTP sent to your email. Please verify.' }
   },
 
   /**
    * Verify a 6-digit OTP and log the user in by returning a JWT token
    */
   async verifyOtp(input: VerifyOtpInput) {
-    const user = await prisma.user.findUnique({ where: { email: input.email } })
-    if (!user) throw createError('User not found', 404)
-
     const otp = await prisma.otpCode.findFirst({
       where: {
         email: input.email,
@@ -66,9 +59,31 @@ export const authService = {
 
     if (!otp) throw createError('Invalid or expired OTP code', 401)
 
-    // Mark OTP as used and verify user
+    // Mark OTP as used
     await prisma.otpCode.update({ where: { id: otp.id }, data: { used: true } })
-    await prisma.user.update({ where: { id: user.id }, data: { isVerified: true } })
+
+    let user = await prisma.user.findUnique({ where: { email: input.email } })
+    
+    // If user doesn't exist, this is a new registration verification
+    if (!user) {
+      if (!otp.pendingName || !otp.pendingPassword) {
+        throw createError('Invalid registration state', 400)
+      }
+      user = await prisma.user.create({
+        data: {
+          name: otp.pendingName,
+          email: otp.email,
+          password: otp.pendingPassword,
+          provider: 'email',
+          isVerified: true,
+        }
+      })
+    } else {
+      // If user exists, just make sure they are verified
+      if (!user.isVerified) {
+        user = await prisma.user.update({ where: { id: user.id }, data: { isVerified: true } })
+      }
+    }
 
     const { password: _, ...safeUser } = user
     const token = signToken({ userId: user.id, email: user.email })

@@ -152,12 +152,16 @@ model OtpCode {
   id        String   @id @default(cuid())
   email     String
   code      String
-  expiresAt DateTime
   used      Boolean  @default(false)
+  expiresAt DateTime
   createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Optional relations and temporary data
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  pendingName     String?
+  pendingPassword String?
 
   @@map("otp_codes")
 }
