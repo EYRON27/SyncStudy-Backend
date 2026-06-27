@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
  * Sends a styled OTP verification email to the user
  */
 export async function sendOtpEmail(email: string, code: string, name: string) {
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: 'SyncStudy <onboarding@resend.dev>', // Change to your domain after verifying with Resend
     to: email,
     subject: `Your SyncStudy verification code: ${code}`,
@@ -54,4 +54,10 @@ export async function sendOtpEmail(email: string, code: string, name: string) {
       </html>
     `,
   })
+
+  if (error) {
+    console.error('❌ Resend API Error:', error)
+  } else {
+    console.log('✅ OTP Email sent successfully:', data)
+  }
 }
