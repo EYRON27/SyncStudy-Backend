@@ -25,3 +25,15 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
 export type GoogleAuthInput = z.infer<typeof googleAuthSchema>
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+})
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  code: z.string().length(6, 'OTP code must be 6 digits'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+})
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express'
 import { authService } from './auth.service'
-import { registerSchema, loginSchema, verifyOtpSchema, googleAuthSchema } from './auth.types'
+import { registerSchema, loginSchema, verifyOtpSchema, googleAuthSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.types'
 import { success } from '../../utils/response'
 import { AuthRequest } from '../../types'
 
@@ -50,6 +50,26 @@ export const authController = {
     try {
       const user = await authService.getMe(req.user!.userId)
       success({ res, data: user })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  async forgotPassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const input = forgotPasswordSchema.parse(req.body)
+      const result = await authService.forgotPassword(input)
+      success({ res, message: result.message })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  async resetPassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const input = resetPasswordSchema.parse(req.body)
+      const result = await authService.resetPassword(input)
+      success({ res, message: result.message })
     } catch (err) {
       next(err)
     }

@@ -16,6 +16,12 @@ router.post('/verify-otp', authController.verifyOtp)
 // POST /api/auth/google — Google OAuth one-click login/register
 router.post('/google', authController.googleLogin)
 
+// POST /api/auth/forgot-password
+router.post('/forgot-password', authController.forgotPassword)
+
+// POST /api/auth/reset-password
+router.post('/reset-password', authController.resetPassword)
+
 // GET  /api/auth/me (protected)
 router.get('/me', authenticate, authController.getMe)
 

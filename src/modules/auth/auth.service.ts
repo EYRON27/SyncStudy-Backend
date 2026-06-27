@@ -3,7 +3,7 @@ import { hashPassword, comparePassword } from '../../utils/hash'
 import { signToken } from '../../utils/jwt'
 import { createError } from '../../middleware/error.middleware'
 import { sendOtpEmail } from '../../utils/email'
-import { RegisterInput, LoginInput, VerifyOtpInput, GoogleAuthInput } from './auth.types'
+import { RegisterInput, LoginInput, VerifyOtpInput, GoogleAuthInput, ForgotPasswordInput, ResetPasswordInput } from './auth.types'
 import { OAuth2Client } from 'google-auth-library'
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
@@ -148,5 +148,61 @@ export const authService = {
     })
     if (!user) throw createError('User not found', 404)
     return user
+  },
+
+  /**
+   * Request a password reset by sending an OTP to the user's email
+   */
+  async forgotPassword(input: ForgotPasswordInput) {
+    const user = await prisma.user.findUnique({ where: { email: input.email } })
+    if (!user) {
+      // Return success anyway to prevent email enumeration
+      return { message: 'If an account exists, a reset code was sent' }
+    }
+    if (user.provider === 'google') {
+      throw createError('This account was created with Google. Please use Google Sign-In.', 400)
+    }
+
+    // Generate a 6-digit OTP, valid for 10 minutes
+    const code = generateOtp()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+    await prisma.otpCode.create({
+      data: { email: user.email, code, expiresAt, userId: user.id }
+    })
+
+    // Send email
+    await sendOtpEmail(user.email, code, user.name)
+
+    return { message: 'OTP sent to your email. Please verify to reset your password.' }
+  },
+
+  /**
+   * Verify the OTP and reset the user's password
+   */
+  async resetPassword(input: ResetPasswordInput) {
+    const user = await prisma.user.findUnique({ where: { email: input.email } })
+    if (!user) throw createError('User not found', 404)
+
+    const otp = await prisma.otpCode.findFirst({
+      where: {
+        email: input.email,
+        code: input.code,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    if (!otp) throw createError('Invalid or expired OTP code', 401)
+
+    // Mark OTP as used and update password
+    const hashedPassword = await hashPassword(input.newPassword)
+    await prisma.otpCode.update({ where: { id: otp.id }, data: { used: true } })
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    })
+
+    return { message: 'Password reset successfully' }
   },
 }
