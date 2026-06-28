@@ -11,6 +11,7 @@ import authRoutes from './modules/auth/auth.routes'
 import tasksRoutes from './modules/tasks/tasks.routes'
 // import usersRoutes from './modules/users/users.routes'      // TODO
 import roomsRoutes from './modules/rooms/rooms.routes'
+import testimonialsRoutes from './modules/testimonials/testimonials.routes'
 // import notesRoutes from './modules/notes/notes.routes'      // TODO
 // import messagesRoutes from './modules/messages/messages.routes' // TODO
 // import schedulerRoutes from './modules/scheduler/scheduler.routes' // TODO
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes)
 // app.use('/api/users', usersRoutes)
 app.use('/api/rooms', roomsRoutes)
 app.use('/api/tasks', tasksRoutes)
+app.use('/api/testimonials', testimonialsRoutes)
 // app.use('/api/rooms', notesRoutes)
 // app.use('/api/rooms', messagesRoutes)
 // app.use('/api/rooms', schedulerRoutes)
