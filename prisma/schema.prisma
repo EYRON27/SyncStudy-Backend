@@ -30,6 +30,7 @@ model User {
   messages      Message[]
   sessions      StudySession[]
   otpCodes      OtpCode[]
+  expenses      Expense[]
 
   @@map("users")
 }
@@ -176,4 +177,19 @@ model Testimonial {
   createdAt DateTime @default(now())
 
   @@map("testimonials")
+}
+
+// ─── Expense ──────────────────────────────────────────────────────────────────
+model Expense {
+  id        String   @id @default(cuid())
+  title     String
+  category  String
+  amount    Float
+  type      String   // "expense" | "income"
+  date      DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
 }
