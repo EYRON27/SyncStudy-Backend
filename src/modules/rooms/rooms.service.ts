@@ -124,8 +124,17 @@ export const roomsService = {
     if (!room) throw createError('Room not found', 404)
     if (room.ownerId !== userId) throw createError('Only the room owner can delete it', 403)
 
-    await prisma.room.delete({
-      where: { id: roomId }
+    // Instead of deleting the room (which cascades and deletes the task),
+    // we just remove the user's membership to hide it from their Study Rooms list,
+    // and delete all messages in the room.
+    await prisma.message.deleteMany({
+      where: { roomId }
+    })
+
+    await prisma.roomMember.delete({
+      where: {
+        userId_roomId: { userId, roomId }
+      }
     })
 
     return { success: true }
