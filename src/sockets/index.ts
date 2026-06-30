@@ -4,6 +4,7 @@ import { env } from '../config/env'
 import { verifyToken } from '../utils/jwt'
 import { registerChatHandlers } from './chat.handler'
 import { registerKanbanHandlers } from './kanban.handler'
+import { setIO } from './socketStore'
 
 /**
  * Initialise the Socket.IO server on top of the HTTP server.
@@ -17,6 +18,8 @@ export const initSocketServer = (httpServer: http.Server): Server => {
       credentials: true,
     },
   })
+
+  setIO(io)
 
   // ─── Socket.IO auth middleware ─────────────────────────────────────────────
   io.use((socket, next) => {
@@ -36,6 +39,9 @@ export const initSocketServer = (httpServer: http.Server): Server => {
   // ─── Connection ────────────────────────────────────────────────────────────
   io.on('connection', (socket) => {
     console.log(`🔌 Socket connected: ${socket.id} (user: ${socket.data.userId})`)
+
+    // Join a personal room to receive direct notifications
+    socket.join(socket.data.userId)
 
     registerChatHandlers(io, socket)
     registerKanbanHandlers(io, socket)

@@ -14,6 +14,7 @@ import roomsRoutes from './modules/rooms/rooms.routes'
 import testimonialsRoutes from './modules/testimonials/testimonials.routes'
 import statsRoutes from './modules/stats/stats.routes'
 import expensesRoutes from './modules/expenses/expenses.routes'
+import notificationsRoutes from './modules/notifications/notifications.routes'
 // import notesRoutes from './modules/notes/notes.routes'      // TODO
 // import messagesRoutes from './modules/messages/messages.routes' // TODO
 // import schedulerRoutes from './modules/scheduler/scheduler.routes' // TODO
@@ -40,6 +41,7 @@ app.use('/api/tasks', tasksRoutes)
 app.use('/api/testimonials', testimonialsRoutes)
 app.use('/api/stats', statsRoutes)
 app.use('/api/expenses', expensesRoutes)
+app.use('/api/notifications', notificationsRoutes)
 // app.use('/api/rooms', notesRoutes)
 // app.use('/api/rooms', messagesRoutes)
 // app.use('/api/rooms', schedulerRoutes)
