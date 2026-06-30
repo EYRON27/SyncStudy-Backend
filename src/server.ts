@@ -4,6 +4,7 @@ import app from './app'
 import { env } from './config/env'
 import { initSocketServer } from './sockets'
 import { prisma } from './lib/prisma'
+import { schedulerService } from './modules/scheduler/scheduler.service'
 
 const httpServer = http.createServer(app)
 
@@ -16,6 +17,8 @@ const start = async () => {
     // Verify database connection on startup
     await prisma.$connect()
     console.log('✅ Database connected')
+
+    schedulerService.startDailyJobs()
 
     httpServer.listen(env.PORT, () => {
       console.log(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`)
