@@ -46,5 +46,32 @@ export const notesController = {
     } catch (err) {
       next(err)
     }
+  },
+
+  async uploadAttachment(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId
+      const noteId = req.params.noteId as string
+      if (!req.file) {
+        res.status(400).json({ success: false, message: 'No file provided' })
+        return
+      }
+      const data = await notesService.uploadAttachment(userId, noteId, req.file)
+      return success({ res, statusCode: 201, message: 'File uploaded', data })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  async deleteAttachment(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId
+      const attachmentId = req.params.attachmentId as string
+      await notesService.deleteAttachment(userId, attachmentId)
+      return success({ res, message: 'Attachment deleted' })
+    } catch (err) {
+      next(err)
+    }
   }
 }
+

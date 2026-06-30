@@ -22,16 +22,17 @@ model User {
   updatedAt  DateTime @updatedAt
 
   // Relations
-  ownedRooms    Room[]        @relation("RoomOwner")
+  ownedRooms    Room[]           @relation("RoomOwner")
   memberships   RoomMember[]
-  tasks         Task[]        @relation("TaskAssignee")
-  createdTasks  Task[]        @relation("TaskCreator")
+  tasks         Task[]           @relation("TaskAssignee")
+  createdTasks  Task[]           @relation("TaskCreator")
   notes         Note[]
   messages      Message[]
   sessions      StudySession[]
   otpCodes      OtpCode[]
   expenses      Expense[]
   notifications Notification[]
+  noteAttachments NoteAttachment[]
 
   @@map("users")
 }
@@ -112,6 +113,8 @@ model Note {
 
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
+
+  attachments NoteAttachment[]
 
   @@map("notes")
 }
@@ -208,4 +211,23 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+// ─── NoteAttachment ─────────────────────────────────────────────────────────────
+model NoteAttachment {
+  id           String   @id @default(cuid())
+  fileName     String
+  fileType     String   // "image" | "pdf"
+  url          String
+  publicId     String   // Cloudinary public_id for deletion
+  size         Int
+  createdAt    DateTime @default(now())
+
+  noteId     String
+  note       Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  uploaderId String
+  uploader   User   @relation(fields: [uploaderId], references: [id])
+
+  @@map("note_attachments")
 }
