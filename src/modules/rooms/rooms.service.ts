@@ -115,27 +115,46 @@ export const roomsService = {
 
   /**
    * Delete a room (Owner only)
+   * - Saves ALL members' notes to their Personal Notes (roomId = null)
+   * - Sends a notification to every non-owner member
+   * - Fully deletes the room (tasks, messages, and memberships cascade-delete)
    */
   async deleteRoom(userId: string, roomId: string) {
     const room = await prisma.room.findUnique({
-      where: { id: roomId }
+      where: { id: roomId },
+      include: {
+        members: {
+          select: { userId: true, role: true }
+        }
+      }
     })
 
     if (!room) throw createError('Room not found', 404)
     if (room.ownerId !== userId) throw createError('Only the room owner can delete it', 403)
 
-    // Instead of deleting the room (which cascades and deletes the task),
-    // we just remove the user's membership to hide it from their Study Rooms list,
-    // and delete all messages in the room.
-    await prisma.message.deleteMany({
-      where: { roomId }
-    })
+    // 1. Fully delete the room — tasks, messages, and memberships are cascade-deleted.
+    //    Because of Prisma's `onDelete: SetNull` on the Note model, ALL notes in this room
+    //    will automatically have their `roomId` set to `null`, which perfectly drops them
+    //    into their respective author's Personal Notes!
+    await prisma.room.delete({ where: { id: roomId } })
 
-    await prisma.roomMember.delete({
-      where: {
-        userId_roomId: { userId, roomId }
-      }
-    })
+    // 2. Notify every non-owner member that the room was deleted.
+    const nonOwnerMembers = room.members.filter(m => m.userId !== userId)
+    if (nonOwnerMembers.length > 0) {
+      await prisma.notification.createMany({
+        data: nonOwnerMembers.map(m => ({
+          userId: m.userId,
+          title: 'Study Room Deleted',
+          desc: `The room "${room.name}" was deleted by the owner. Your notes from this room have been saved to your Personal Notes.`,
+          type: 'room',
+          isRead: false,
+        }))
+      })
+    }
+
+    // 3. Fully delete the room — tasks, messages, and memberships are cascade-deleted.
+    //    Notes are already detached (roomId = null) so they won't be cascade-deleted.
+    await prisma.room.delete({ where: { id: roomId } })
 
     return { success: true }
   }

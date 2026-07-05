@@ -20,7 +20,7 @@ export const notesService = {
     if (!member) throw createError('Not a member of this room', 403)
 
     return prisma.note.findMany({
-      where: { roomId },
+      where: { roomId, authorId: userId },
       include: { attachments: { orderBy: { createdAt: 'asc' } } },
       orderBy: { updatedAt: 'desc' }
     })
@@ -130,4 +130,3 @@ export const notesService = {
     return { success: true }
   }
 }
-
