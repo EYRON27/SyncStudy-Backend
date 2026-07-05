@@ -6,6 +6,14 @@ import type { CreateNoteInput, UpdateNoteInput } from './notes.types'
 export const notesService = {
   /** Get all notes in a room */
   async getNotes(userId: string, roomId: string) {
+    if (roomId === 'personal') {
+      return prisma.note.findMany({
+        where: { authorId: userId, roomId: null },
+        include: { attachments: { orderBy: { createdAt: 'asc' } } },
+        orderBy: { updatedAt: 'desc' }
+      })
+    }
+
     const member = await prisma.roomMember.findUnique({
       where: { userId_roomId: { userId, roomId } }
     })
@@ -20,6 +28,13 @@ export const notesService = {
 
   /** Create a new note in a room */
   async createNote(userId: string, roomId: string, input: CreateNoteInput) {
+    if (roomId === 'personal') {
+      return prisma.note.create({
+        data: { title: input.title, content: input.content ?? '', roomId: null, authorId: userId },
+        include: { attachments: true }
+      })
+    }
+
     const member = await prisma.roomMember.findUnique({
       where: { userId_roomId: { userId, roomId } }
     })
