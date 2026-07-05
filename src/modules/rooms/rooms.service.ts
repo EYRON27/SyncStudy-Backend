@@ -166,10 +166,6 @@ export const roomsService = {
       })
     }
 
-    // 3. Fully delete the room — tasks, messages, and memberships are cascade-deleted.
-    //    Notes are already detached (roomId = null) so they won't be cascade-deleted.
-    await prisma.room.delete({ where: { id: roomId } })
-
     return { success: true }
   }
 }
