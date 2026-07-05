@@ -51,6 +51,16 @@ export const tasksService = {
           }
         }
       })
+    } else {
+      // Re-add the user to the room if they were previously removed (e.g., when the room was "deleted")
+      const existingMember = await prisma.roomMember.findUnique({
+        where: { userId_roomId: { userId, roomId: room.id } }
+      })
+      if (!existingMember) {
+        await prisma.roomMember.create({
+          data: { userId, roomId: room.id, role: 'owner' }
+        })
+      }
     }
 
     // 2. Create the task
@@ -102,6 +112,15 @@ export const tasksService = {
             members: { create: { userId: userId, role: 'owner' } }
           }
         })
+      } else {
+        const existingMember = await prisma.roomMember.findUnique({
+          where: { userId_roomId: { userId, roomId: room.id } }
+        })
+        if (!existingMember) {
+          await prisma.roomMember.create({
+            data: { userId, roomId: room.id, role: 'owner' }
+          })
+        }
       }
       updateData.roomId = room.id
     }
