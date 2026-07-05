@@ -132,6 +132,20 @@ export const roomsService = {
     if (!room) throw createError('Room not found', 404)
     if (room.ownerId !== userId) throw createError('Only the room owner can delete it', 403)
 
+    // 0. Update note titles to include where they came from
+    const notesInRoom = await prisma.note.findMany({
+      where: { roomId }
+    })
+
+    for (const note of notesInRoom) {
+      if (!note.title.includes(`(from ${room.name})`)) {
+        await prisma.note.update({
+          where: { id: note.id },
+          data: { title: `${note.title || 'Untitled'} (from ${room.name})` }
+        })
+      }
+    }
+
     // 1. Fully delete the room — tasks, messages, and memberships are cascade-deleted.
     //    Because of Prisma's `onDelete: SetNull` on the Note model, ALL notes in this room
     //    will automatically have their `roomId` set to `null`, which perfectly drops them
