@@ -8,6 +8,7 @@ export const schedulerService = {
     cron.schedule('0 8 * * *', async () => {
       console.log('⏳ Running daily task scheduler...')
       await this.checkDueTasks()
+      await this.cleanupAiChats()
     })
     console.log('⏰ Scheduler initialized (runs daily at 8:00 AM)')
   },
@@ -51,6 +52,24 @@ export const schedulerService = {
     } catch (err) {
       console.error('Error running checkDueTasks:', err)
       throw err
+    }
+  },
+
+  async cleanupAiChats() {
+    try {
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+      const result = await prisma.aiChat.deleteMany({
+        where: {
+          updatedAt: {
+            lt: thirtyDaysAgo
+          }
+        }
+      })
+      console.log(`🧹 Cleaned up ${result.count} AI chats older than 30 days.`)
+    } catch (err) {
+      console.error('Error running cleanupAiChats:', err)
     }
   }
 }
