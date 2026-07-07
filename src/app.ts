@@ -17,6 +17,7 @@ import expensesRoutes from './modules/expenses/expenses.routes'
 import notificationsRoutes from './modules/notifications/notifications.routes'
 import schedulerRoutes from './modules/scheduler/scheduler.routes'
 import notesRoutes from './modules/notes/notes.routes'
+import aiRoutes from './modules/ai/ai.routes'
 
 const app = express()
 
@@ -43,6 +44,7 @@ app.use('/api/expenses', expensesRoutes)
 app.use('/api/notifications', notificationsRoutes)
 app.use('/api/scheduler', schedulerRoutes)
 app.use('/api/rooms/:roomId/notes', notesRoutes)
+app.use('/api/ai', aiRoutes)
 
 // ─── 404 handler ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
