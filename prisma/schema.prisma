@@ -33,6 +33,7 @@ model User {
   expenses      Expense[]
   notifications Notification[]
   noteAttachments NoteAttachment[]
+  aiChats       AiChat[]
 
   @@map("users")
 }
@@ -230,4 +231,32 @@ model NoteAttachment {
   uploader   User   @relation(fields: [uploaderId], references: [id])
 
   @@map("note_attachments")
+}
+
+// ─── AiChat ───────────────────────────────────────────────────────────────────
+model AiChat {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages AiMessage[]
+
+  @@map("ai_chats")
+}
+
+// ─── AiMessage ────────────────────────────────────────────────────────────────
+model AiMessage {
+  id        String   @id @default(cuid())
+  role      String   // "user" | "ai"
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  chatId String
+  chat   AiChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("ai_messages")
 }
