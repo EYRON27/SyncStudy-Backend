@@ -17,14 +17,14 @@ export const dashboardService = {
     // 1. Tasks Completed
     const thisWeekTasks = await prisma.task.count({
       where: {
-        assigneeId: userId,
+        OR: [{ assigneeId: userId }, { creatorId: userId }],
         status: 'done',
         updatedAt: { gte: thisWeekStart }
       }
     })
     const lastWeekTasks = await prisma.task.count({
       where: {
-        assigneeId: userId,
+        OR: [{ assigneeId: userId }, { creatorId: userId }],
         status: 'done',
         updatedAt: { gte: lastWeekStart, lt: lastWeekEnd }
       }
@@ -114,7 +114,7 @@ export const dashboardService = {
     // 6. Priority Tasks
     const priorityTasksRaw = await prisma.task.findMany({
       where: {
-        assigneeId: userId,
+        OR: [{ assigneeId: userId }, { creatorId: userId }],
         status: { not: 'done' }
       },
       include: {
