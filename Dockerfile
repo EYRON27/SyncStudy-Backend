@@ -7,8 +7,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copy Prisma schema and generate client
+# Copy Prisma schema, config, and generate client
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 RUN npx prisma generate
 
 # Copy source and compile TypeScript
@@ -24,8 +25,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 
-# Copy Prisma schema and generate client in production image
+# Copy Prisma schema, config, and generate client in production image
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 RUN npx prisma generate
 
 # Copy compiled output from builder stage
