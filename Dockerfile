@@ -35,5 +35,5 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 5000
 
-# Run migrations then start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
+# Start the server (skipping migrate to avoid Supabase pooler hanging)
+CMD ["node", "dist/server.js"]

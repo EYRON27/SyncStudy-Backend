@@ -20,7 +20,7 @@ const start = async () => {
 
     schedulerService.startDailyJobs()
 
-    httpServer.listen(env.PORT, () => {
+    httpServer.listen(env.PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`)
       console.log(`   REST  → http://localhost:${env.PORT}/api`)
       console.log(`   WS    → ws://localhost:${env.PORT}`)
