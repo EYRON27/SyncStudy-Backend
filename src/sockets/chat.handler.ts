@@ -26,6 +26,10 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
     socket.to(roomId).emit('chat:user_left', { userId: socket.data.userId })
   })
 
+  socket.on('call:announce', ({ roomId, agoraUid, userName }: { roomId: string; agoraUid: number; userName: string }) => {
+    io.to(roomId).emit('call:peer_name', { agoraUid, userName })
+  })
+
   socket.on(
     'chat:message',
     async ({ roomId, content, senderId }: { roomId: string; content: string; senderId: string }) => {
