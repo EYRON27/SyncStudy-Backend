@@ -10,6 +10,7 @@ router.use(authenticate)
 router.get('/', roomsController.getRooms)
 router.post('/', roomsController.createRoom)
 router.post('/join', roomsController.joinRoom)
+router.get('/agora-token', roomsController.getAgoraToken)
 router.get('/:roomId', roomsController.getRoomById)
 router.delete('/:roomId', roomsController.deleteRoom)
 
