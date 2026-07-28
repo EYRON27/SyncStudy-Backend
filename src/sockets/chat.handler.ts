@@ -30,6 +30,10 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
     io.to(roomId).emit('call:peer_name', { agoraUid, userName })
   })
 
+  socket.on('call:end_for_all', ({ roomId }: { roomId: string }) => {
+    io.to(roomId).emit('call:ended')
+  })
+
   socket.on(
     'chat:message',
     async ({ roomId, content, senderId }: { roomId: string; content: string; senderId: string }) => {
