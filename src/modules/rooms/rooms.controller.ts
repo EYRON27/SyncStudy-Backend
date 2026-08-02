@@ -83,6 +83,7 @@ export const roomsController = {
         channelName,
         0, // 0 allows Agora to auto-assign UID
         RtcRole.PUBLISHER,
+        privilegeExpiredTs,
         privilegeExpiredTs
       )
 
